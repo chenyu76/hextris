@@ -51,126 +51,6 @@ class Matrix {
 
 let ht = null;
 
-function drawTutorial() {
-  const container = document.getElementById("tutorial-diagram");
-  const hexSize = 14;
-  const sqrt3 = 1.732050808;
-
-  const cubeToPixel = (q, r) => [
-    hexSize * (sqrt3 * q + sqrt3 / 2 * r),
-    hexSize * (3 / 2 * r),
-  ];
-
-  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-  svg.setAttribute("viewBox", "-85 -90 170 175");
-
-  const drawHex = (q, r, fill, stroke, dash) => {
-    const [cx, cy] = cubeToPixel(q, r);
-    const points = [];
-    for (let i = 0; i < 6; i++) {
-      const angle = 2 * Math.PI / 6 * (i + 0.5);
-      points.push(`${(cx + hexSize * Math.cos(angle)).toFixed(1)},${(cy + hexSize * Math.sin(angle)).toFixed(1)}`);
-    }
-    const poly = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
-    poly.setAttribute("points", points.join(" "));
-    poly.setAttribute("fill", fill);
-    poly.setAttribute("stroke", stroke);
-    poly.setAttribute("stroke-width", "1.5");
-    if (dash) poly.setAttribute("stroke-dasharray", dash);
-    svg.appendChild(poly);
-  };
-
-  const directions = [[1,0,-1],[1,-1,0],[0,-1,1],[-1,0,1],[-1,1,0],[0,1,-1]];
-  const dist = p => Math.abs(p[0]) + Math.abs(p[1]) + Math.abs(-p[0]-p[1]);
-
-  // All hexes up to ring 3, generate by expanding from center
-  const visited = new Set();
-  const frontier = [[0,0,0]];
-  visited.add("0,0,0");
-  while (frontier.length > 0) {
-    const pos = frontier.shift();
-    const d = dist(pos);
-    if (d > 8) continue;
-    for (const dir of directions) {
-      const n = [pos[0]+dir[0], pos[1]+dir[1], pos[2]+dir[2]];
-      const key = n.join(",");
-      if (!visited.has(key) && dist(n) <= 8) {
-        visited.add(key);
-        frontier.push(n);
-      }
-    }
-  }
-  const allPositions = [...visited].map(k => k.split(",").map(Number));
-
-  // Draw each hex with color based on distance
-  for (const pos of allPositions) {
-    const [q, r] = [pos[0], pos[1]];
-    const d = dist(pos);
-    let fill, stroke;
-    if (d === 0) {
-      fill = "#888"; stroke = "#666";
-    } else if (d === 2) {
-      fill = "#BDBDBD"; stroke = "#999";
-    } else if (d === 4) {
-      fill = "#FF9800"; stroke = "#E65100";
-    } else if (d === 6) {
-      fill = "#FFCC80"; stroke = "#FF9800";
-      drawHex(q, r, fill, stroke, "3 3");
-    } else if (d === 8) {
-      fill = "#E0E0E0"; stroke = "#ccc";
-      drawHex(q, r, fill, stroke, "3 3");
-    }
-    if (d <= 6 && !(d === 6)) {
-      drawHex(q, r, fill, stroke);
-    }
-  }
-
-  // Highlight ring at dist=4
-  for (const pos of allPositions) {
-    if (dist(pos) === 4) {
-      const [q, r] = [pos[0], pos[1]];
-      const [cx, cy] = cubeToPixel(q, r);
-      const ring = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
-      const pts = [];
-      for (let i = 0; i < 6; i++) {
-        const angle = 2 * Math.PI / 6 * (i + 0.5);
-        pts.push(`${(cx + (hexSize+3) * Math.cos(angle)).toFixed(1)},${(cy + (hexSize+3) * Math.sin(angle)).toFixed(1)}`);
-      }
-      ring.setAttribute("points", pts.join(" "));
-      ring.setAttribute("fill", "none");
-      ring.setAttribute("stroke", "#D84315");
-      ring.setAttribute("stroke-width", "2");
-      ring.setAttribute("stroke-dasharray", "2 2");
-      svg.appendChild(ring);
-    }
-  }
-
-  // Labels
-  const addText = (x, y, text, color, size) => {
-    const t = document.createElementNS("http://www.w3.org/2000/svg", "text");
-    t.setAttribute("x", x);
-    t.setAttribute("y", y);
-    t.setAttribute("fill", color);
-    t.setAttribute("text-anchor", "middle");
-    t.setAttribute("font-size", size);
-    t.setAttribute("font-weight", "bold");
-    t.textContent = text;
-    svg.appendChild(t);
-  };
-
-  const [, ringY] = cubeToPixel(0, 4);
-  addText(85, ringY - 22, "Complete ring", "#D84315", "7");
-  addText(85, ringY - 10, "= eliminated!", "#D84315", "7");
-
-  container.innerHTML = "";
-  container.appendChild(svg);
-
-  document.getElementById("tutorial-text").textContent =
-    "Fill a complete ring of hexagons to eliminate it! Outer hexes then fall inward — if they complete another ring, chain reactions score big.";
-}
-
-drawTutorial();
-
 // Settings sliders — game config
 
 function getGameOptions() {
@@ -211,6 +91,18 @@ document.getElementById("restart-btn").addEventListener("click", () => {
     ht = new HexTris("grid-container", 10, options);
   }
   document.getElementById("end-screen").classList.add("hidden");
+});
+
+// Settings restart button
+document.getElementById("settings-restart").addEventListener("click", () => {
+  const options = getGameOptions();
+  document.getElementById("settings-screen").classList.add("hidden");
+  document.getElementById("end-screen").classList.add("hidden");
+  if (ht) {
+    ht.restart(options);
+  } else {
+    ht = new HexTris("grid-container", 10, options);
+  }
 });
 
 // Settings navigation
