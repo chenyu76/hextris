@@ -335,16 +335,16 @@ class SoundEffect {
     if (!this.audioContext)
       this.initializeAudioContext();
 
-    const toggleButton = document.getElementById('toggleBGM');
+    const toggleButton = document.getElementById('settings-bgm');
     this.isPlaying = !this.isPlaying;
     if (this.isPlaying) {
       this.currentStep = 0;
       this.nextNoteTime = this.audioContext.currentTime;
       this.sequencer(); // 启动音序器
-      toggleButton.textContent = '停止音乐';
+      toggleButton.textContent = 'Stop BGM';
     } else {
       clearTimeout(this.sequencerTimer); // 停止音序器
-      toggleButton.textContent = '播放音乐';
+      toggleButton.textContent = 'Play BGM';
     }
     return this.isPlaying;
   }
