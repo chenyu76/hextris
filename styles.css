@@ -208,6 +208,25 @@ button:active {
 	margin: 10px 0;
 }
 
+/* Tutorial */
+#tutorial-diagram {
+	margin: 0 auto 8px;
+	width: 280px;
+	height: 220px;
+}
+
+#tutorial-diagram svg {
+	width: 100%;
+	height: 100%;
+}
+
+#tutorial-text {
+	font-size: 0.85rem;
+	color: #555;
+	margin: 0 0 14px;
+	line-height: 1.4;
+}
+
 /* Portrait layout for mobile */
 @media (max-width: 600px), (orientation: portrait) {
 	.container {
